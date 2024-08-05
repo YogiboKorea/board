@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포토후기 예시</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">포토후기 예시</h1>
+        
+        <!-- 게시글 목록 -->
+        <div id="posts">
+            <!-- 댓글 목록 -->
+            <div id="comments" class="mb-4">
+                <h5>포토후기</h5>
+                <!-- 여기에 포토후기가 추가됩니다 -->
+            </div>
+            <!-- 댓글 작성 폼 -->
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="fileInput">사진 업로드</label>
+                    <input type="file" class="form-control-file" id="fileInput" name="file" required>
+                </div>
+                <div class="form-group">
+                    <label for="textInput">후기 작성</label>
+                    <input type="text" class="form-control" id="textInput" name="text" placeholder="후기를 작성해주세요" required>
+                </div>
+                <button type="submit" class="btn btn-primary">후기 남기기</button>
+            </form>
+        </div>
+        <div>데이터 불러오기부분</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadComments();
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const textInput = document.getElementById('textInput').value;
+
+            if (!file) {
+                alert('사진을 업로드 해주세요.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('text', textInput);
+
+            axios.post('http://localhost:8010/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+            .then(response => {
+                console.log('Success:', response.data);
+                alert('성공');
+                // location.reload()을 setTimeout과 함께 사용하여 약간의 딜레이 후에 새로고침되도록 함
+                setTimeout(() => {
+                    loadComments(); // 페이지를 새로고침 대신 데이터를 다시 불러옴
+                }, 1000);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                if (error.response) {
+                    console.error('Error data:', error.response.data);
+                    console.error('Error status:', error.response.status);
+                    console.error('Error headers:', error.response.headers);
+                }
+                alert('실패');
+            });
+        });
+
+        function loadComments() {
+            console.log('Loading comments');
+            axios.get('http://localhost:8010/replay')
+                .then(response => {
+                    console.log('Comments loaded:', response.data);
+                    const commentsDiv = document.getElementById('comments');
+                    commentsDiv.innerHTML = '';
+                    response.data.forEach(review => {
+                        addComment(review);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching reviews:', error);
+                    console.error(error.message);
+                });
+        }
+
+        function addComment(review) {
+            const commentsDiv = document.getElementById('comments');
+            const comment = document.createElement('div');
+            comment.className = 'card mb-3';
+            comment.innerHTML = `
+                <div class="card-body">
+                    <p class="card-text">${review.text}</p>
+                    <img src="${review.remoteFilePath}" alt="포토후기" class="img-fluid">
+                </div>
+            `;
+            commentsDiv.appendChild(comment);
+        }
+    </script>
+</body>
+</html>

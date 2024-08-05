@@ -8,7 +8,7 @@ const cors = require('cors');
 const { MongoClient } = require('mongodb');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8010;
 
 app.use(cors());
 app.use(express.json());
@@ -144,11 +144,13 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
 // 댓글 데이터 가져오기
 app.get('/replay', (req, res) => {
-    db.collection('replay').find({}, { projection: { text: 1, remoteFilePath: 1, _id: 0 } }).sort({ uploadDate: 1 }).toArray((err, reviews) => {
+    console.log('Fetching replay data');
+    db.collection('replay').find({}, { projection: { text: 1, remoteFilePath: 1, _id: 0 } }).sort({ uploadDate: -1 }).toArray((err, reviews) => {
         if (err) {
             console.error('MongoDB 조회 실패:', err);
             return res.status(500).json({ error: 'MongoDB 조회 실패' });
         }
+        console.log('Replay data fetched:', reviews);
         res.status(200).json(reviews);
     });
 });
