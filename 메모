@@ -1,0 +1,5 @@
+const ftpServer = 'yogibo.ftp.cafe24.com';
+const ftpUsername = 'yogibo';
+const ftpPassword = 'korea2024@@';
+
+const MONGO_URI = 'mongodb+srv://yogibo:yogibo@cluster0.vvkyawf.mongodb.net/?retryWrites=true&w=majority';
